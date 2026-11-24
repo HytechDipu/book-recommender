@@ -87,6 +87,13 @@
                                 <h3>{{ book.title }}</h3>
                                 <p class="author">{{ book.authors }}</p>
                                 <p class="category">{{ book.categories }}</p>
+                                {% if book.matched_keywords %}
+                                  <div class="keyword-tags" aria-label="Matched keywords">
+                                    {% for kw in book.matched_keywords %}
+                                    <span class="keyword-tag">{{ kw }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                                 <p class="description">
                                     {% if book.description|length > 120 %}
                                         {{ book.description[:117] }}...
