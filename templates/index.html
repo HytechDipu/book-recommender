@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Book Recommender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark and light mode">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Dark</span>
+    </button>
+
+    <main class="container">
+        <header class="page-header">
+            <h1>AI Book Recommender</h1>
+            <p>Live Content-Based Filtering using TF-IDF &amp; Cosine Similarity</p>
+        </header>
+
+        <section class="search-section" aria-label="Book search">
+            <form method="POST" class="search-form" id="searchForm">
+                <label class="sr-only" for="bookTitle">Book title</label>
+                <input
+                    id="bookTitle"
+                    type="text"
+                    name="book_title"
+                    placeholder="Enter any book title..."
+                    value="{{ selected_book }}"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="recommendButton">Recommend</button>
+            </form>
+
+            <div class="demo-chips" aria-label="Example searches">
+                <span>Quick try:</span>
+                <button type="button" class="demo-chip" data-query="The Immortals of Meluha">The Immortals of Meluha</button>
+                <button type="button" class="demo-chip" data-query="Malgudi Days">Malgudi Days</button>
+                <button type="button" class="demo-chip" data-query="Atomic Habits">Atomic Habits</button>
+                <button type="button" class="demo-chip" data-query="The Hobbit">The Hobbit</button>
+            </div>
+
+            <div class="loading-state" id="loadingState" role="status" aria-live="polite" hidden>
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Fetching books &amp; calculating similarity...</span>
+            </div>
+        </section>
+
+        {% if error_message %}
+            <div class="error-message" role="alert">{{ error_message }}</div>
+        {% endif %}
+
+        {% if target_book %}
+            <section class="matched-section" aria-labelledby="matchedHeading">
+                <h2 id="matchedHeading">Matched Book</h2>
+                <article class="matched-banner">
+                    {% if target_book.thumbnail %}
+                        <img src="{{ target_book.thumbnail }}" alt="Cover of {{ target_book.title }}">
+                    {% else %}
+                        <div class="no-cover banner-no-cover">No Cover</div>
+                    {% endif %}
+                    <div class="matched-details">
+                        <h3>{{ target_book.title }}</h3>
+                        <p><strong>Author:</strong> {{ target_book.authors }}</p>
+                        <p><strong>Category:</strong> {{ target_book.categories }}</p>
+                    </div>
+                </article>
+            </section>
+        {% endif %}
+
+        {% if recommendations %}
+            <section class="recommendations-section" aria-labelledby="recommendationsHeading">
+                <h2 id="recommendationsHeading">Top 5 Recommendations</h2>
+                <div class="recommendations-grid">
+                    {% for book in recommendations %}
+                        <article class="book-card">
+                            <div class="cover-wrap">
+                                {% if book.thumbnail %}
+                                    <img src="{{ book.thumbnail }}" alt="Cover of {{ book.title }}">
+                                {% else %}
+                                    <div class="no-cover">No Cover</div>
+                                {% endif %}
+                                <span class="match-badge">{{ book.match }}% Match</span>
+                            </div>
+                            <div class="card-content">
+                                <h3>{{ book.title }}</h3>
+                                <p class="author">{{ book.authors }}</p>
+                                <p class="category">{{ book.categories }}</p>
+                                <p class="description">
+                                    {% if book.description|length > 120 %}
+                                        {{ book.description[:117] }}...
+                                    {% else %}
+                                        {{ book.description }}
+                                    {% endif %}
+                                </p>
+                                <a
+                                    class="view-button"
+                                    href="{{ book.info_link }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >View Book</a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% elif target_book %}
+            <p class="empty-message">The matched book was found, but there were not enough different candidates to rank.</p>
+        {% endif %}
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
